@@ -1,1 +1,10 @@
-<p>gpt-prompt works!</p>
+<textarea [(ngModel)]="prompt" placeholder="Enter your prompt here..."></textarea>
+<button (click)="sendPrompt()">Send Prompt</button>
+
+<div *ngIf="loading">Loading...</div>
+
+<div *ngIf="response">
+    <h2>Response:</h2>
+    <pre [innerHTML]="response"></pre>
+    <!-- <pre>{{ response }}</pre> -->
+</div>
