@@ -29,7 +29,7 @@ export class GptPromptComponent {
       .subscribe({
         next: (response) => {
           const content = response.choices[0]?.message?.content || '';
-          this.response = content;
+          this.response = this.formatResponse(content);
           this.loading = false;
         },
         error: (error) => {
@@ -37,5 +37,9 @@ export class GptPromptComponent {
           this.loading = false;
         }
       });
+  }
+
+  formatResponse(text: string): string {
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   }
 }

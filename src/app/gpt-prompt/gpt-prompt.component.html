@@ -5,5 +5,6 @@
 
 <div *ngIf="response">
     <h2>Response:</h2>
-    <pre>{{ response }}</pre>
+    <pre [innerHTML]="response"></pre>
+    <!-- <pre>{{ response }}</pre> -->
 </div>
