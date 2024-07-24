@@ -4,6 +4,10 @@ import { JsonPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+interface GPTResponse {
+  choices: Array<{ message: { content: string } }>;
+}
+
 @Component({
   selector: 'app-gpt-prompt',
   templateUrl: './gpt-prompt.component.html',
@@ -13,22 +17,23 @@ import { CommonModule } from '@angular/common';
 })
 export class GptPromptComponent {
   prompt = '';
-  response: any = null;
+  response: string = '';
   loading = false;
 
   constructor(private http: HttpClient) {}
 
   sendPrompt() {
     this.loading = true;
-    this.response = null;
-    this.http.post('https://contractbot-api.azurewebsites.net/api/gpt', { prompt: this.prompt })
+    this.response = '';
+    this.http.post<GPTResponse>('https://contractbot-api.azurewebsites.net/api/gpt', { prompt: this.prompt })
       .subscribe({
         next: (response) => {
-          this.response = response;
+          const content = response.choices[0]?.message?.content || '';
+          this.response = content;
           this.loading = false;
         },
         error: (error) => {
-          this.response = { error: 'An error occurred: ' + error.message };
+          this.response = 'An error occurred: ' + error.message;
           this.loading = false;
         }
       });
