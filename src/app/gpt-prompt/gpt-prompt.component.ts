@@ -46,13 +46,30 @@ export class GptPromptComponent implements OnInit, OnDestroy {
   }
 
   sendPrompt() {
+    const apiUrl = 'https://contractbot-api.azurewebsites.net/api/gpt';
+    // const apiUrl = 'http://localhost:5000/api/gpt';
     this.loading = true;
     this.response = '';
+<<<<<<< Updated upstream
     const message = {
       role: 'user',
       content: this.prompt
     };
     this.webSocketService.sendMessage(message);
+=======
+    this.http.post<GPTResponse>(apiUrl, { prompt: this.prompt })
+      .subscribe({
+        next: (response) => {
+          const content = response.choices[0]?.message?.content || '';
+          this.response = this.formatResponse(content);
+          this.loading = false;
+        },
+        error: (error) => {
+          this.response = 'An error occurred: ' + error.message;
+          this.loading = false;
+        }
+      });
+>>>>>>> Stashed changes
   }
 
   formatResponse(text: string): string {
