@@ -25,7 +25,8 @@ export class GptPromptComponent implements OnInit, OnDestroy {
   constructor(private webSocketService: WebSocketService) {}
 
   ngOnInit(): void {
-    const socketUrl = 'ws://localhost:5000/ws';
+    // const socketUrl = 'ws://localhost:5000/ws';
+    const socketUrl = 'wss://contractbot-api.azurewebsites.net/ws'
     this.webSocketService.connect(socketUrl);
     this.subscription = this.webSocketService.getMessages().subscribe({
       next: (response) => {
