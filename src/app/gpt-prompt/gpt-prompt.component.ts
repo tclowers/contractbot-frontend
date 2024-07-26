@@ -23,9 +23,11 @@ export class GptPromptComponent {
   constructor(private http: HttpClient) {}
 
   sendPrompt() {
+    const apiUrl = 'https://contractbot-api.azurewebsites.net/api/gpt';
+    // const apiUrl = 'http://localhost:5000/api/gpt';
     this.loading = true;
     this.response = '';
-    this.http.post<GPTResponse>('https://contractbot-api.azurewebsites.net/api/gpt', { prompt: this.prompt })
+    this.http.post<GPTResponse>(apiUrl, { prompt: this.prompt })
       .subscribe({
         next: (response) => {
           const content = response.choices[0]?.message?.content || '';
