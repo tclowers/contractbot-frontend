@@ -1,3 +1,14 @@
+<div>
+  <h2>Upload PDF</h2>
+  <input type="file" (change)="onFileSelected($event)" accept=".pdf">
+  <button (click)="uploadFile()">Upload</button>
+</div>
+
+<div *ngIf="uploadResponse">
+  <h3>Upload Response:</h3>
+  <div>{{ uploadResponse }}</div>
+</div>
+
 <textarea [(ngModel)]="prompt" placeholder="Enter your prompt here..."></textarea>
 <button (click)="sendPrompt()">Send Prompt</button>
 
@@ -6,5 +17,4 @@
 <div *ngIf="response">
     <h2>Response:</h2>
     <pre [innerHTML]="response"></pre>
-    <!-- <pre>{{ response }}</pre> -->
 </div>
