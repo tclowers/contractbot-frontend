@@ -8,7 +8,17 @@
       </div>
       <div *ngIf="uploadResponse">
         <h3>Contract:</h3>
-        <textarea readonly>{{ uploadResponse }}</textarea>
+        <textarea [readonly]="!isEditing" [(ngModel)]="uploadResponse"></textarea>
+        <button *ngIf="!isEditing" (click)="startEditing()">Edit</button>
+        <div *ngIf="isEditing">
+          <button (click)="saveEdits()" [disabled]="loading">Save</button>
+          <button (click)="cancelEditing()" [disabled]="loading">Cancel</button>
+        </div>
+        <div *ngIf="loading">Updating PDF...</div>
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+          <button (click)="clearErrorMessage()">Dismiss</button>
+        </div>
         <a *ngIf="blobStorageLocation" [href]="blobStorageLocation" target="_blank">Download Updated File</a>
       </div>
     </div>

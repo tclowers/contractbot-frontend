@@ -10,6 +10,7 @@ interface GPTResponse {
 
 interface UploadResponse {
   text: string;
+  originalFileName: string;
   blobStorageLocation: string;
 }
 
@@ -29,7 +30,11 @@ export class GptPromptComponent {
   loading = false;
   uploadResponse: string = '';
   selectedFile: File | null = null;
+  originalFileName: string | null = null;
   blobStorageLocation: string | null = null;
+  isEditing = false;
+  originalUploadResponse = '';
+  errorMessage: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -72,12 +77,55 @@ export class GptPromptComponent {
       .subscribe({
         next: (response) => {
           this.uploadResponse = response.text;
+          this.originalFileName = response.originalFileName;
           this.blobStorageLocation = response.blobStorageLocation;
         },
         error: (error) => {
           this.uploadResponse = 'An error occurred during file upload: ' + error.message;
+          this.originalFileName = null;
           this.blobStorageLocation = null;
         }
       });
+  }
+
+  startEditing() {
+    this.isEditing = true;
+    this.originalUploadResponse = this.uploadResponse;
+  }
+
+  cancelEditing() {
+    this.isEditing = false;
+    this.uploadResponse = this.originalUploadResponse;
+  }
+
+  saveEdits() {
+    const apiUrl = `${serverUrl}/api/gpt/generate-pdf`;
+    const requestBody = {
+      fileName: this.originalFileName,
+      textContent: this.uploadResponse
+    };
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.http.post<any>(apiUrl, requestBody).subscribe({
+      next: (response) => {
+        console.log('PDF generated successfully', response);
+        this.isEditing = false;
+        this.loading = false;
+        if (response.blobStorageLocation) {
+          this.blobStorageLocation = response.blobStorageLocation;
+        }
+      },
+      error: (error) => {
+        console.error('Error generating PDF', error);
+        this.loading = false;
+        this.errorMessage = 'An error occurred while updating the PDF. Please try again.';
+      }
+    });
+  }
+
+  clearErrorMessage() {
+    this.errorMessage = '';
   }
 }
