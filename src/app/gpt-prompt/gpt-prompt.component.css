@@ -1,3 +1,79 @@
-div.response-content {
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 95vh;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.col {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin: 0 10px 20px;
+  min-width: 0;
+}
+
+.contract-col, .dialog-col {
+  max-width: 100%;
+}
+
+textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 150px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.contract-col textarea {
+  height: 70vh;
+  min-height: 70vh;
+}
+
+button {
+  margin-bottom: 10px;
+}
+
+.response-content {
   white-space: pre-wrap;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 150px;
+}
+
+a {
+  display: block;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid red;
+  background-color: #ffeeee;
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .col {
+    margin: 0 0 20px;
+  }
 }
