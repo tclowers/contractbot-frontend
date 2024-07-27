@@ -3,44 +3,45 @@
   max-width: 100%;
   margin: 0 auto;
   padding: 20px;
-  height: 100vh;
+  min-height: 95vh;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center the container */
+  align-items: center;
 }
 
 .row {
   display: flex;
-  flex: 1;
-  height: 100%;
-  justify-content: center; /* Center the columns within the row */
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .col {
+  flex: 1 1 300px;
   display: flex;
   flex-direction: column;
   padding: 10px;
-  /* min-width: 300px; */
-  min-width: 100%;
-  margin: 0 10px;
+  margin: 0 10px 20px;
+  min-width: 0;
 }
 
-.contract-col {
-  flex: 0 0 40%;
-  overflow-y: auto;
-}
-
-.dialog-col {
-  flex: 0 0 40%;
-  display: flex;
-  flex-direction: column;
+.contract-col, .dialog-col {
+  max-width: 100%;
 }
 
 textarea {
   width: 100%;
   flex: 1;
+  min-height: 150px;
   margin-bottom: 10px;
-  resize: none;
+  resize: vertical;
+}
+
+.contract-col textarea {
+  height: 70vh;
+  min-height: 70vh;
 }
 
 button {
@@ -51,6 +52,7 @@ button {
   white-space: pre-wrap;
   overflow-y: auto;
   flex: 1;
+  min-height: 150px;
 }
 
 a {
@@ -64,4 +66,14 @@ a {
   padding: 10px;
   border: 1px solid red;
   background-color: #ffeeee;
+}
+
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .col {
+    margin: 0 0 20px;
+  }
 }
