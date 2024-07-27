@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container" [class.file-uploaded]="blobStorageLocation">
   <div class="row">
-    <div class="col">
+    <div class="col contract-col">
       <div *ngIf="!blobStorageLocation">
         <h2>Upload PDF</h2>
         <input type="file" (change)="onFileSelected($event)" accept=".pdf">
@@ -22,16 +22,15 @@
         <a *ngIf="blobStorageLocation" [href]="blobStorageLocation" target="_blank">Download Updated File</a>
       </div>
     </div>
-    <div class="col">
+    <div class="col dialog-col">
       <div *ngIf="blobStorageLocation">
         <h3>Dialog:</h3>
+        <div *ngIf="response" class="response-content">
+          <pre [innerHTML]="response"></pre>
+        </div>
         <textarea [(ngModel)]="prompt" placeholder="Prompt LLM"></textarea>
         <button (click)="sendPrompt()">Send Prompt</button>
         <div *ngIf="loading">Loading...</div>
-        <div *ngIf="response">
-          <h3>Response:</h3>
-          <pre [innerHTML]="response"></pre>
-        </div>
       </div>
     </div>
   </div>
