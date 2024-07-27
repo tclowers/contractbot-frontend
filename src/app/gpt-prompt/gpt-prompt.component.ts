@@ -12,6 +12,12 @@ interface UploadResponse {
   text: string;
   originalFileName: string;
   blobStorageLocation: string;
+  contractType: string;
+  product: string;
+  price: number;
+  volume: number;
+  deliveryTerms: string;
+  appendix: string;
 }
 
 // const serverUrl = 'https://contractbot-api.azurewebsites.net';
@@ -35,6 +41,12 @@ export class GptPromptComponent {
   isEditing = false;
   originalUploadResponse = '';
   errorMessage: string = '';
+  contractType: string = '';
+  product: string = '';
+  price: number | null = null;
+  volume: number | null = null;
+  deliveryTerms: string = '';
+  appendix: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -79,11 +91,23 @@ export class GptPromptComponent {
           this.uploadResponse = response.text;
           this.originalFileName = response.originalFileName;
           this.blobStorageLocation = response.blobStorageLocation;
+          this.contractType = response.contractType;
+          this.product = response.product;
+          this.price = response.price;
+          this.volume = response.volume;
+          this.deliveryTerms = response.deliveryTerms;
+          this.appendix = response.appendix;
         },
         error: (error) => {
           this.uploadResponse = 'An error occurred during file upload: ' + error.message;
           this.originalFileName = null;
           this.blobStorageLocation = null;
+          this.contractType = '';
+          this.product = '';
+          this.price = null;
+          this.volume = null;
+          this.deliveryTerms = '';
+          this.appendix = '';
         }
       });
   }

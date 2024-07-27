@@ -34,14 +34,14 @@
 textarea {
   width: 100%;
   flex: 1;
-  min-height: 150px;
+  min-height: 30px;
   margin-bottom: 10px;
   resize: vertical;
 }
 
 .contract-col textarea {
-  height: 70vh;
-  min-height: 70vh;
+  height: 60vh;
+  min-height: 60vh;
 }
 
 button {
