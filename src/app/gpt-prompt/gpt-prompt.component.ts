@@ -50,6 +50,7 @@ export class GptPromptComponent {
   volume: string = '';
   deliveryTerms: string = '';
   appendix: string = '';
+  fileId: number = 0;
 
   constructor(private http: HttpClient) {}
 
@@ -57,14 +58,46 @@ export class GptPromptComponent {
     const apiUrl = `${serverUrl}/api/gpt`;
     this.loading = true;
     this.response = '';
-    this.http.post<GPTResponse>(apiUrl, { prompt: this.prompt })
+
+    const requestBody = {
+      contract: {
+        isContract: true,
+        fileId: this.fileId,
+        originalFileName: this.originalFileName,
+        blobStorageLocation: this.blobStorageLocation,
+        contractText: this.uploadResponse,
+        contractType: this.contractType,
+        product: this.product,
+        price: this.price,
+        volume: this.volume,
+        deliveryTerms: this.deliveryTerms,
+        appendix: this.appendix
+      },
+      prompt: this.prompt
+    };
+
+    this.http.post<any>(apiUrl, requestBody)
       .subscribe({
         next: (response) => {
-          const content = response.choices[0]?.message?.content || '';
-          this.response = this.formatResponse(content);
+          console.log('Response from server:', response);
+          try {
+            const parsedResponse = JSON.parse(response.response);
+            if (parsedResponse.prompt_type === 'contract_edit') {
+              this.response = parsedResponse.prompt_response;
+              this.uploadResponse = parsedResponse.updated_text;
+            } else if (parsedResponse.prompt_type === 'query') {
+              this.response = parsedResponse.prompt_response;
+            } else {
+              this.response = 'Unexpected response type';
+            }
+          } catch (error) {
+            console.error('Error parsing response:', error);
+            this.response = 'Error parsing server response';
+          }
           this.loading = false;
         },
         error: (error) => {
+          console.error('Error from server:', error);
           this.response = 'An error occurred: ' + error.message;
           this.loading = false;
         }
@@ -113,6 +146,7 @@ export class GptPromptComponent {
             this.volume = response.volume;
             this.deliveryTerms = response.deliveryTerms;
             this.appendix = response.appendix;
+            this.fileId = response.fileId;
           }
         },
         error: (error) => {
