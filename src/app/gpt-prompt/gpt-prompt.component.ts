@@ -9,9 +9,18 @@ interface GPTResponse {
 }
 
 interface UploadResponse {
-  text: string;
+  isContract: boolean;
+  fileId: number;
   originalFileName: string;
   blobStorageLocation: string;
+  contractText: string;
+  contractType: string;
+  product: string;
+  price: string;
+  volume: string;
+  deliveryTerms: string;
+  appendix: string;
+  message?: string;
 }
 
 // const serverUrl = 'https://contractbot-api.azurewebsites.net';
@@ -35,6 +44,12 @@ export class GptPromptComponent {
   isEditing = false;
   originalUploadResponse = '';
   errorMessage: string = '';
+  contractType: string = '';
+  product: string = '';
+  price: string = '';
+  volume: string = '';
+  deliveryTerms: string = '';
+  appendix: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -76,14 +91,41 @@ export class GptPromptComponent {
     this.http.post<UploadResponse>(`${serverUrl}/api/gpt/upload-pdf`, formData)
       .subscribe({
         next: (response) => {
-          this.uploadResponse = response.text;
-          this.originalFileName = response.originalFileName;
-          this.blobStorageLocation = response.blobStorageLocation;
+          if (response.isContract === false) {
+            this.errorMessage = response.message || 'The uploaded document is not a contract.';
+            this.uploadResponse = '';
+            this.originalFileName = null;
+            this.blobStorageLocation = null;
+            this.contractType = '';
+            this.product = '';
+            this.price = '';
+            this.volume = '';
+            this.deliveryTerms = '';
+            this.appendix = '';
+          } else {
+            this.errorMessage = '';
+            this.uploadResponse = response.contractText; // Changed from response.text
+            this.originalFileName = response.originalFileName;
+            this.blobStorageLocation = response.blobStorageLocation;
+            this.contractType = response.contractType;
+            this.product = response.product;
+            this.price = response.price;
+            this.volume = response.volume;
+            this.deliveryTerms = response.deliveryTerms;
+            this.appendix = response.appendix;
+          }
         },
         error: (error) => {
-          this.uploadResponse = 'An error occurred during file upload: ' + error.message;
+          this.errorMessage = 'An error occurred during file upload: ' + error.message;
+          this.uploadResponse = '';
           this.originalFileName = null;
           this.blobStorageLocation = null;
+          this.contractType = '';
+          this.product = '';
+          this.price = '';
+          this.volume = '';
+          this.deliveryTerms = '';
+          this.appendix = '';
         }
       });
   }
