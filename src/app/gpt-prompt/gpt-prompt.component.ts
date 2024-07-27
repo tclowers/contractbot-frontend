@@ -10,6 +10,7 @@ interface GPTResponse {
 
 interface UploadResponse {
   text: string;
+  blobStorageLocation: string;
 }
 
 // const serverUrl = 'https://contractbot-api.azurewebsites.net';
@@ -28,6 +29,7 @@ export class GptPromptComponent {
   loading = false;
   uploadResponse: string = '';
   selectedFile: File | null = null;
+  blobStorageLocation: string | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -70,9 +72,11 @@ export class GptPromptComponent {
       .subscribe({
         next: (response) => {
           this.uploadResponse = response.text;
+          this.blobStorageLocation = response.blobStorageLocation;
         },
         error: (error) => {
           this.uploadResponse = 'An error occurred during file upload: ' + error.message;
+          this.blobStorageLocation = null;
         }
       });
   }
