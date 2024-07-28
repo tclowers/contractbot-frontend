@@ -10,7 +10,7 @@ interface GPTResponse {
 
 interface UploadResponse {
   isContract: boolean;
-  fileId: number;
+  id: number;
   originalFileName: string;
   blobStorageLocation: string;
   contractText: string;
@@ -52,11 +52,40 @@ export class GptPromptComponent {
   volume: string = '';
   deliveryTerms: string = '';
   appendix: string = '';
-  fileId: number = 0;
+  id: number = 0;
   futureDeliveryDate: string = '';
   settlementTerms: string = '';
+  contracts: { id: number; originalFileName: string }[] = [];
+  selectedContractId: number | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.fetchContracts();
+  }
+
+  fetchContracts() {
+    this.http.get<{ id: number; originalFileName: string }[]>(`${serverUrl}/api/gpt/contracts`)
+      .subscribe({
+        next: (contracts) => {
+          this.contracts = contracts;
+        },
+        error: (error) => {
+          console.error('Error fetching contracts:', error);
+        }
+      });
+  }
+
+  fetchContractById(id: number) {
+    this.http.get<UploadResponse>(`${serverUrl}/api/gpt/contract/${id}`)
+      .subscribe({
+        next: (response) => {
+          this.handleContractResponse(response);
+        },
+        error: (error) => {
+          console.error('Error fetching contract:', error);
+          this.errorMessage = 'An error occurred while fetching the contract.';
+        }
+      });
+  }
 
   sendPrompt() {
     const apiUrl = `${serverUrl}/api/gpt`;
@@ -66,7 +95,7 @@ export class GptPromptComponent {
     const requestBody = {
       contract: {
         isContract: true,
-        fileId: this.fileId,
+        id: this.id,
         originalFileName: this.originalFileName,
         blobStorageLocation: this.blobStorageLocation,
         contractText: this.uploadResponse,
@@ -85,7 +114,8 @@ export class GptPromptComponent {
         next: (response) => {
           console.log('Response from server:', response);
           try {
-            const parsedResponse = JSON.parse(response.response);
+            // Use a more lenient JSON parsing method
+            const parsedResponse = this.parseJsonSafely(response.response);
             if (parsedResponse.prompt_type === 'contract_edit') {
               this.response = parsedResponse.prompt_response;
               this.uploadResponse = parsedResponse.updated_text;
@@ -108,6 +138,30 @@ export class GptPromptComponent {
       });
   }
 
+  parseJsonSafely(str: string): any {
+    // First, try to parse it as-is
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      // If that fails, try to clean up the string
+      console.warn('Initial JSON parse failed, attempting to clean string');
+      
+      // Replace any unescaped newlines, carriage returns, or tabs
+      str = str.replace(/[\n\r\t]/g, '\\$&');
+      
+      // Replace any unescaped quotes
+      str = str.replace(/(?<!\\)"/g, '\\"');
+      
+      // Try parsing again
+      try {
+        return JSON.parse(str);
+      } catch (e2) {
+        console.error('Failed to parse JSON even after cleaning', e2);
+        throw e2;
+      }
+    }
+  }
+
   formatResponse(text: string): string {
     return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   }
@@ -128,46 +182,51 @@ export class GptPromptComponent {
     this.http.post<UploadResponse>(`${serverUrl}/api/gpt/upload-pdf`, formData)
       .subscribe({
         next: (response) => {
-          if (response.isContract === false) {
-            this.errorMessage = response.message || 'The uploaded document is not a contract.';
-            this.uploadResponse = '';
-            this.originalFileName = null;
-            this.blobStorageLocation = null;
-            this.contractType = '';
-            this.product = '';
-            this.price = '';
-            this.volume = '';
-            this.deliveryTerms = '';
-            this.appendix = '';
-          } else {
-            this.errorMessage = '';
-            this.uploadResponse = response.contractText;
-            this.originalFileName = response.originalFileName;
-            this.blobStorageLocation = response.blobStorageLocation;
-            this.contractType = response.contractType;
-            this.product = response.product;
-            this.price = response.price;
-            this.volume = response.volume;
-            this.deliveryTerms = response.deliveryTerms;
-            this.appendix = response.appendix;
-            this.fileId = response.fileId;
-            this.futureDeliveryDate = response.futureDeliveryDate || '';
-            this.settlementTerms = response.settlementTerms || '';
-          }
+          this.handleContractResponse(response);
         },
         error: (error) => {
           this.errorMessage = 'An error occurred during file upload: ' + error.message;
-          this.uploadResponse = '';
-          this.originalFileName = null;
-          this.blobStorageLocation = null;
-          this.contractType = '';
-          this.product = '';
-          this.price = '';
-          this.volume = '';
-          this.deliveryTerms = '';
-          this.appendix = '';
+          this.resetContractData();
         }
       });
+  }
+
+  handleContractResponse(response: UploadResponse) {
+    if (response.isContract === false) {
+      this.errorMessage = response.message || 'The uploaded document is not a contract.';
+      this.resetContractData();
+    } else {
+      this.errorMessage = '';
+      this.uploadResponse = response.contractText;
+      this.originalFileName = response.originalFileName;
+      this.blobStorageLocation = response.blobStorageLocation;
+      this.contractType = response.contractType;
+      this.product = response.product;
+      this.price = response.price;
+      this.volume = response.volume;
+      this.deliveryTerms = response.deliveryTerms;
+      this.appendix = response.appendix;
+      this.id = response.id;
+      this.futureDeliveryDate = response.futureDeliveryDate || '';
+      this.settlementTerms = response.settlementTerms || '';
+      this.selectedContractId = response.id;
+      
+      // Refresh the contracts list after uploading a new contract
+      this.fetchContracts();
+    }
+  }
+
+  resetContractData() {
+    this.uploadResponse = '';
+    this.originalFileName = null;
+    this.blobStorageLocation = null;
+    this.contractType = '';
+    this.product = '';
+    this.price = '';
+    this.volume = '';
+    this.deliveryTerms = '';
+    this.appendix = '';
+    this.selectedContractId = null;
   }
 
   startEditing() {

@@ -12,23 +12,28 @@
 
 .row {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: space-between;
   width: 100%;
   max-width: 1200px;
 }
 
 .col {
-  flex: 1 1 300px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   padding: 10px;
-  margin: 0 10px 20px;
+  margin: 0 10px;
   min-width: 0;
 }
 
+.upload-col {
+  flex-basis: 100%;
+}
+
 .contract-col, .dialog-col {
-  max-width: 100%;
+  flex-basis: calc(50% - 20px);
+  max-width: calc(50% - 20px);
 }
 
 textarea {
@@ -70,10 +75,16 @@ a {
 
 @media (max-width: 768px) {
   .row {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
 
   .col {
+    flex-basis: 100%;
     margin: 0 0 20px;
+  }
+
+  .contract-col, .dialog-col {
+    flex-basis: 100%;
+    max-width: 100%;
   }
 }
