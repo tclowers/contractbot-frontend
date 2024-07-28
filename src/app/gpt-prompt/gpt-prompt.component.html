@@ -3,12 +3,13 @@
     <div *ngIf="selectedContractId === null" class="col upload-col">
       <h2>Upload New Contract</h2>
       <input type="file" (change)="onFileSelected($event)" accept=".pdf">
-      <button (click)="uploadFile()">Upload PDF</button>
+      <button (click)="uploadFile()" class="upload-button">Upload PDF</button>
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
         <button (click)="clearErrorMessage()">Dismiss</button>
       </div>
-      <div *ngIf="contracts.length > 0">
+      <div *ngIf="isLoadingContracts">Loading contracts...</div>
+      <div *ngIf="!isLoadingContracts && contracts.length > 0">
         <h3>Existing Contracts</h3>
         <ul>
           <li *ngFor="let contract of contracts">
@@ -16,12 +17,13 @@
           </li>
         </ul>
       </div>
+      <div *ngIf="!isLoadingContracts && contracts.length === 0">No contracts found.</div>
     </div>
     <div *ngIf="selectedContractId !== null" class="col contract-col">
       <h3>Contract:</h3>
       <textarea [readonly]="!isEditing" [(ngModel)]="uploadResponse"></textarea>
       <button *ngIf="!isEditing" (click)="startEditing()">Edit</button>
-      <div *ngIf="isEditing">
+      <div *ngIf="isEditing" class="button-group">
         <button (click)="saveEdits()" [disabled]="loading">Save</button>
         <button (click)="cancelEditing()" [disabled]="loading">Cancel</button>
       </div>

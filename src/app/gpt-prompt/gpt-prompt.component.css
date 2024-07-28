@@ -51,6 +51,20 @@ textarea {
 
 button {
   margin-bottom: 10px;
+  width: 150px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.button-group button {
+  flex: 1;
+}
+
+.upload-button {
+  width: 150px;
 }
 
 .response-content {

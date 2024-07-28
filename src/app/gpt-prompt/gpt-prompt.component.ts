@@ -57,19 +57,23 @@ export class GptPromptComponent {
   settlementTerms: string = '';
   contracts: { id: number; originalFileName: string }[] = [];
   selectedContractId: number | null = null;
+  isLoadingContracts = false;
 
   constructor(private http: HttpClient) {
     this.fetchContracts();
   }
 
   fetchContracts() {
+    this.isLoadingContracts = true;
     this.http.get<{ id: number; originalFileName: string }[]>(`${serverUrl}/api/gpt/contracts`)
       .subscribe({
         next: (contracts) => {
           this.contracts = contracts;
+          this.isLoadingContracts = false;
         },
         error: (error) => {
           console.error('Error fetching contracts:', error);
+          this.isLoadingContracts = false;
         }
       });
   }
