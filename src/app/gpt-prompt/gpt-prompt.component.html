@@ -32,6 +32,8 @@
         <p><strong>Price:</strong> {{price}}</p>
         <p><strong>Volume:</strong> {{volume}}</p>
         <p><strong>Delivery Terms:</strong> {{deliveryTerms}}</p>
+        <p *ngIf="contractType === 'Forward Contract'"><strong>Future Delivery Date:</strong> {{futureDeliveryDate | date:'medium'}}</p>
+        <p *ngIf="contractType === 'Forward Contract'"><strong>Settlement Terms:</strong> {{settlementTerms}}</p>
         <p><strong>Appendix:</strong> {{appendix}}</p>
         <hr/>
         <h3>Dialog:</h3>
