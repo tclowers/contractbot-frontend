@@ -20,6 +20,8 @@ interface UploadResponse {
   volume: string;
   deliveryTerms: string;
   appendix: string;
+  futureDeliveryDate?: string;
+  settlementTerms?: string;
   message?: string;
 }
 
@@ -51,6 +53,8 @@ export class GptPromptComponent {
   deliveryTerms: string = '';
   appendix: string = '';
   fileId: number = 0;
+  futureDeliveryDate: string = '';
+  settlementTerms: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -137,7 +141,7 @@ export class GptPromptComponent {
             this.appendix = '';
           } else {
             this.errorMessage = '';
-            this.uploadResponse = response.contractText; // Changed from response.text
+            this.uploadResponse = response.contractText;
             this.originalFileName = response.originalFileName;
             this.blobStorageLocation = response.blobStorageLocation;
             this.contractType = response.contractType;
@@ -147,6 +151,8 @@ export class GptPromptComponent {
             this.deliveryTerms = response.deliveryTerms;
             this.appendix = response.appendix;
             this.fileId = response.fileId;
+            this.futureDeliveryDate = response.futureDeliveryDate || '';
+            this.settlementTerms = response.settlementTerms || '';
           }
         },
         error: (error) => {
