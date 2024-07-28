@@ -240,22 +240,24 @@ export class GptPromptComponent {
   }
 
   saveEdits() {
-    const apiUrl = `${serverUrl}/api/gpt/generate-pdf`;
+    const apiUrl = `${serverUrl}/api/gpt/edit-contract/${this.id}`;
     const requestBody = {
-      fileName: this.originalFileName,
       textContent: this.uploadResponse
     };
 
     this.loading = true;
     this.errorMessage = '';
 
-    this.http.post<any>(apiUrl, requestBody).subscribe({
+    this.http.patch<any>(apiUrl, requestBody).subscribe({
       next: (response) => {
         console.log('PDF generated successfully', response);
         this.isEditing = false;
         this.loading = false;
-        if (response.blobStorageLocation) {
-          this.blobStorageLocation = response.blobStorageLocation;
+        if (response.blobUrl) {
+          this.blobStorageLocation = response.blobUrl;
+        }
+        if (response.updatedContract) {
+          this.updateContractDetails(response.updatedContract);
         }
       },
       error: (error) => {
@@ -264,6 +266,15 @@ export class GptPromptComponent {
         this.errorMessage = 'An error occurred while updating the PDF. Please try again.';
       }
     });
+  }
+
+  updateContractDetails(updatedContract: any) {
+    this.contractType = updatedContract.contractType;
+    this.product = updatedContract.product;
+    this.price = updatedContract.price;
+    this.volume = updatedContract.volume;
+    this.deliveryTerms = updatedContract.deliveryTerms;
+    this.appendix = updatedContract.appendix;
   }
 
   clearErrorMessage() {
