@@ -13,19 +13,25 @@
   }
   
   .contract-col textarea {
-    min-height: 400px;
-  }
-
-  .dialog-col textarea {
-    min-height: 100px;
+    min-height: 50em;
+    width: 100%;
+    box-sizing: border-box;
   }
   
-  .button-group {
-    margin-top: 10px;
+  .dialog-col textarea {
+    min-height: 5em;
+    width: 100%;
+    box-sizing: border-box;
   }
+  
+  /* .button-group {
+    margin-top: 1em;
+  } */
 
   button {
+    margin-top: 1em;
     margin-bottom: 1em;
+    margin-right: 1em;
   }
   
   .response-content {
