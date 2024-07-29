@@ -1,4 +1,14 @@
-# ContractbotFrontend
+# ContractBot App
+## _A "Simple" Angular Front End for an LLM Powered Contract Assistant_
+
+This back end service works in concert with a .Net 8 back-end API found here: https://github.com/tclowers/contractbotapi
+
+## Features
+- Parses text from a PDF contract file
+- Detects non-contract files
+- Parses essential data points from a contract
+- Allows for querying of contract content via LLM
+- Performs contract edits using natural language via LLM
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.1.
 
@@ -25,3 +35,6 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+Copyright 2024 Tom Clowers
