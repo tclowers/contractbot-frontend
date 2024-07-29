@@ -1,0 +1,36 @@
+.contract-viewer-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .contract-col, .dialog-col {
+    width: 48%;
+  }
+  
+  textarea {
+    width: 100%;
+    min-height: 300px;
+  }
+  
+  .contract-col textarea {
+    min-height: 400px;
+  }
+
+  .dialog-col textarea {
+    min-height: 100px;
+  }
+  
+  .button-group {
+    margin-top: 10px;
+  }
+
+  button {
+    margin-bottom: 1em;
+  }
+  
+  .response-content {
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }

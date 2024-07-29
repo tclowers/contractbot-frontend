@@ -1,0 +1,17 @@
+<h2>Upload New Contract</h2>
+<input type="file" (change)="onFileSelected($event)" accept=".pdf">
+<button (click)="uploadFile()" class="upload-button">Upload PDF</button>
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+  <button (click)="clearErrorMessage()">Dismiss</button>
+</div>
+<div *ngIf="isLoadingContracts">Loading contracts...</div>
+<div *ngIf="!isLoadingContracts && contracts.length > 0">
+  <h3>Existing Contracts</h3>
+  <ul>
+    <li *ngFor="let contract of contracts">
+      <a (click)="fetchContractById(contract.id)">{{ contract.originalFileName }}</a>
+    </li>
+  </ul>
+</div>
+<div *ngIf="!isLoadingContracts && contracts.length === 0">No contracts found.</div>
