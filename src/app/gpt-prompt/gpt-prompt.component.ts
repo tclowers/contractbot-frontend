@@ -92,24 +92,11 @@ export class GptPromptComponent {
   }
 
   sendPrompt() {
-    const apiUrl = `${serverUrl}/api/gpt`;
+    const apiUrl = `${serverUrl}/api/gpt/contract/${this.id}/prompt`;
     this.loading = true;
     this.response = '';
 
     const requestBody = {
-      contract: {
-        isContract: true,
-        id: this.id,
-        originalFileName: this.originalFileName,
-        blobStorageLocation: this.blobStorageLocation,
-        contractText: this.uploadResponse,
-        contractType: this.contractType,
-        product: this.product,
-        price: this.price,
-        volume: this.volume,
-        deliveryTerms: this.deliveryTerms,
-        appendix: this.appendix
-      },
       prompt: this.prompt
     };
 
@@ -117,20 +104,14 @@ export class GptPromptComponent {
       .subscribe({
         next: (response) => {
           console.log('Response from server:', response);
-          try {
-            // Use a more lenient JSON parsing method
-            const parsedResponse = this.parseJsonSafely(response.response);
-            if (parsedResponse.prompt_type === 'contract_edit') {
-              this.response = parsedResponse.prompt_response;
-              this.uploadResponse = parsedResponse.updated_text;
-            } else if (parsedResponse.prompt_type === 'query') {
-              this.response = parsedResponse.prompt_response;
-            } else {
-              this.response = 'Unexpected response type';
-            }
-          } catch (error) {
-            console.error('Error parsing response:', error);
-            this.response = 'Error parsing server response';
+          if (response.response.prompt_type === 'contract_edit') {
+            this.response = response.response.prompt_response;
+            this.uploadResponse = response.response.updated_text;
+            this.updateContractDetails(response.updatedContract);
+          } else if (response.response.prompt_type === 'query') {
+            this.response = response.response.prompt_response;
+          } else {
+            this.response = 'Unexpected response type';
           }
           this.loading = false;
         },
@@ -279,6 +260,8 @@ export class GptPromptComponent {
     this.volume = updatedContract.volume;
     this.deliveryTerms = updatedContract.deliveryTerms;
     this.appendix = updatedContract.appendix;
+    this.futureDeliveryDate = updatedContract.futureDeliveryDate;
+    this.settlementTerms = updatedContract.settlementTerms;
   }
 
   clearErrorMessage() {
