@@ -10,7 +10,7 @@ interface GPTResponse {
 
 interface UploadResponse {
   isContract: boolean;
-  fileId: number;
+  id: number;
   originalFileName: string;
   blobStorageLocation: string;
   contractText: string;
@@ -52,31 +52,51 @@ export class GptPromptComponent {
   volume: string = '';
   deliveryTerms: string = '';
   appendix: string = '';
-  fileId: number = 0;
+  id: number = 0;
   futureDeliveryDate: string = '';
   settlementTerms: string = '';
+  contracts: { id: number; originalFileName: string }[] = [];
+  selectedContractId: number | null = null;
+  isLoadingContracts = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.fetchContracts();
+  }
+
+  fetchContracts() {
+    this.isLoadingContracts = true;
+    this.http.get<{ id: number; originalFileName: string }[]>(`${serverUrl}/api/gpt/contracts`)
+      .subscribe({
+        next: (contracts) => {
+          this.contracts = contracts;
+          this.isLoadingContracts = false;
+        },
+        error: (error) => {
+          console.error('Error fetching contracts:', error);
+          this.isLoadingContracts = false;
+        }
+      });
+  }
+
+  fetchContractById(id: number) {
+    this.http.get<UploadResponse>(`${serverUrl}/api/gpt/contract/${id}`)
+      .subscribe({
+        next: (response) => {
+          this.handleContractResponse(response);
+        },
+        error: (error) => {
+          console.error('Error fetching contract:', error);
+          this.errorMessage = 'An error occurred while fetching the contract.';
+        }
+      });
+  }
 
   sendPrompt() {
-    const apiUrl = `${serverUrl}/api/gpt`;
+    const apiUrl = `${serverUrl}/api/gpt/contract/${this.id}/prompt`;
     this.loading = true;
     this.response = '';
 
     const requestBody = {
-      contract: {
-        isContract: true,
-        fileId: this.fileId,
-        originalFileName: this.originalFileName,
-        blobStorageLocation: this.blobStorageLocation,
-        contractText: this.uploadResponse,
-        contractType: this.contractType,
-        product: this.product,
-        price: this.price,
-        volume: this.volume,
-        deliveryTerms: this.deliveryTerms,
-        appendix: this.appendix
-      },
       prompt: this.prompt
     };
 
@@ -84,19 +104,14 @@ export class GptPromptComponent {
       .subscribe({
         next: (response) => {
           console.log('Response from server:', response);
-          try {
-            const parsedResponse = JSON.parse(response.response);
-            if (parsedResponse.prompt_type === 'contract_edit') {
-              this.response = parsedResponse.prompt_response;
-              this.uploadResponse = parsedResponse.updated_text;
-            } else if (parsedResponse.prompt_type === 'query') {
-              this.response = parsedResponse.prompt_response;
-            } else {
-              this.response = 'Unexpected response type';
-            }
-          } catch (error) {
-            console.error('Error parsing response:', error);
-            this.response = 'Error parsing server response';
+          if (response.response.prompt_type === 'contract_edit') {
+            this.response = response.response.prompt_response;
+            this.uploadResponse = response.response.updated_text;
+            this.updateContractDetails(response.updatedContract);
+          } else if (response.response.prompt_type === 'query') {
+            this.response = response.response.prompt_response;
+          } else {
+            this.response = 'Unexpected response type';
           }
           this.loading = false;
         },
@@ -106,6 +121,30 @@ export class GptPromptComponent {
           this.loading = false;
         }
       });
+  }
+
+  parseJsonSafely(str: string): any {
+    // First, try to parse it as-is
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      // If that fails, try to clean up the string
+      console.warn('Initial JSON parse failed, attempting to clean string');
+      
+      // Replace any unescaped newlines, carriage returns, or tabs
+      str = str.replace(/[\n\r\t]/g, '\\$&');
+      
+      // Replace any unescaped quotes
+      str = str.replace(/(?<!\\)"/g, '\\"');
+      
+      // Try parsing again
+      try {
+        return JSON.parse(str);
+      } catch (e2) {
+        console.error('Failed to parse JSON even after cleaning', e2);
+        throw e2;
+      }
+    }
   }
 
   formatResponse(text: string): string {
@@ -128,46 +167,51 @@ export class GptPromptComponent {
     this.http.post<UploadResponse>(`${serverUrl}/api/gpt/upload-pdf`, formData)
       .subscribe({
         next: (response) => {
-          if (response.isContract === false) {
-            this.errorMessage = response.message || 'The uploaded document is not a contract.';
-            this.uploadResponse = '';
-            this.originalFileName = null;
-            this.blobStorageLocation = null;
-            this.contractType = '';
-            this.product = '';
-            this.price = '';
-            this.volume = '';
-            this.deliveryTerms = '';
-            this.appendix = '';
-          } else {
-            this.errorMessage = '';
-            this.uploadResponse = response.contractText;
-            this.originalFileName = response.originalFileName;
-            this.blobStorageLocation = response.blobStorageLocation;
-            this.contractType = response.contractType;
-            this.product = response.product;
-            this.price = response.price;
-            this.volume = response.volume;
-            this.deliveryTerms = response.deliveryTerms;
-            this.appendix = response.appendix;
-            this.fileId = response.fileId;
-            this.futureDeliveryDate = response.futureDeliveryDate || '';
-            this.settlementTerms = response.settlementTerms || '';
-          }
+          this.handleContractResponse(response);
         },
         error: (error) => {
           this.errorMessage = 'An error occurred during file upload: ' + error.message;
-          this.uploadResponse = '';
-          this.originalFileName = null;
-          this.blobStorageLocation = null;
-          this.contractType = '';
-          this.product = '';
-          this.price = '';
-          this.volume = '';
-          this.deliveryTerms = '';
-          this.appendix = '';
+          this.resetContractData();
         }
       });
+  }
+
+  handleContractResponse(response: UploadResponse) {
+    if (response.isContract === false) {
+      this.errorMessage = response.message || 'The uploaded document is not a contract.';
+      this.resetContractData();
+    } else {
+      this.errorMessage = '';
+      this.uploadResponse = response.contractText;
+      this.originalFileName = response.originalFileName;
+      this.blobStorageLocation = response.blobStorageLocation;
+      this.contractType = response.contractType;
+      this.product = response.product;
+      this.price = response.price;
+      this.volume = response.volume;
+      this.deliveryTerms = response.deliveryTerms;
+      this.appendix = response.appendix;
+      this.id = response.id;
+      this.futureDeliveryDate = response.futureDeliveryDate || '';
+      this.settlementTerms = response.settlementTerms || '';
+      this.selectedContractId = response.id;
+      
+      // Refresh the contracts list after uploading a new contract
+      this.fetchContracts();
+    }
+  }
+
+  resetContractData() {
+    this.uploadResponse = '';
+    this.originalFileName = null;
+    this.blobStorageLocation = null;
+    this.contractType = '';
+    this.product = '';
+    this.price = '';
+    this.volume = '';
+    this.deliveryTerms = '';
+    this.appendix = '';
+    this.selectedContractId = null;
   }
 
   startEditing() {
@@ -181,22 +225,24 @@ export class GptPromptComponent {
   }
 
   saveEdits() {
-    const apiUrl = `${serverUrl}/api/gpt/generate-pdf`;
+    const apiUrl = `${serverUrl}/api/gpt/edit-contract/${this.id}`;
     const requestBody = {
-      fileName: this.originalFileName,
       textContent: this.uploadResponse
     };
 
     this.loading = true;
     this.errorMessage = '';
 
-    this.http.post<any>(apiUrl, requestBody).subscribe({
+    this.http.patch<any>(apiUrl, requestBody).subscribe({
       next: (response) => {
         console.log('PDF generated successfully', response);
         this.isEditing = false;
         this.loading = false;
-        if (response.blobStorageLocation) {
-          this.blobStorageLocation = response.blobStorageLocation;
+        if (response.blobUrl) {
+          this.blobStorageLocation = response.blobUrl;
+        }
+        if (response.updatedContract) {
+          this.updateContractDetails(response.updatedContract);
         }
       },
       error: (error) => {
@@ -205,6 +251,17 @@ export class GptPromptComponent {
         this.errorMessage = 'An error occurred while updating the PDF. Please try again.';
       }
     });
+  }
+
+  updateContractDetails(updatedContract: any) {
+    this.contractType = updatedContract.contractType;
+    this.product = updatedContract.product;
+    this.price = updatedContract.price;
+    this.volume = updatedContract.volume;
+    this.deliveryTerms = updatedContract.deliveryTerms;
+    this.appendix = updatedContract.appendix;
+    this.futureDeliveryDate = updatedContract.futureDeliveryDate;
+    this.settlementTerms = updatedContract.settlementTerms;
   }
 
   clearErrorMessage() {
