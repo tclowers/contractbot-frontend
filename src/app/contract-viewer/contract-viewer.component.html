@@ -1,0 +1,34 @@
+<div class="contract-viewer-container">
+  <div class="contract-col">
+    <h3>Contract:</h3>
+    <textarea [readonly]="!isEditing" [(ngModel)]="contractText"></textarea>
+    <button *ngIf="!isEditing" (click)="startEditing()">Edit</button>
+    <div *ngIf="isEditing" class="button-group">
+      <button (click)="saveEdits()" [disabled]="loading">Save</button>
+      <button (click)="cancelEditing()" [disabled]="loading">Cancel</button>
+    </div>
+    <div *ngIf="loading">Updating PDF...</div>
+    <div class="contract-details">
+      <a [href]="blobStorageLocation" target="_blank">Download Updated File</a>
+    </div>
+  </div>
+  <div class="dialog-col">
+    <h3>Contract Details:</h3>
+    <p><strong>Contract Type:</strong> {{contractType}}</p>
+    <p><strong>Product:</strong> {{product}}</p>
+    <p><strong>Price:</strong> {{price}}</p>
+    <p><strong>Volume:</strong> {{volume}}</p>
+    <p><strong>Delivery Terms:</strong> {{deliveryTerms}}</p>
+    <p *ngIf="contractType === 'Forward Contract'"><strong>Future Delivery Date:</strong> {{futureDeliveryDate | date:'medium'}}</p>
+    <p *ngIf="contractType === 'Forward Contract'"><strong>Settlement Terms:</strong> {{settlementTerms}}</p>
+    <p><strong>Appendix:</strong> {{appendix}}</p>
+    <hr/>
+    <h3>Dialog:</h3>
+    <textarea [(ngModel)]="prompt" placeholder="Prompt LLM"></textarea>
+    <button (click)="sendPrompt()">Send Prompt</button>
+    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="response" class="response-content">
+      <pre [innerHTML]="response"></pre>
+    </div>
+  </div>
+</div>
