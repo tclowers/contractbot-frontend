@@ -2,8 +2,8 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
-// const serverUrl = 'https://contractbot-api.azurewebsites.net';
-const serverUrl = 'http://localhost:5198';
+const serverUrl = 'https://contractbot-api.azurewebsites.net';
+// const serverUrl = 'http://localhost:5198';
 
 interface UploadResponse {
   isContract: boolean;
@@ -42,9 +42,6 @@ export class ContractUploadComponent {
   constructor(private http: HttpClient) {
     this.fetchContracts();
   }
-
-  // Include the methods: clearErrorMessage
-  // These methods should be copied from the GptPromptComponent and adjusted as necessary
 
   fetchContracts() {
     this.isLoadingContracts = true;

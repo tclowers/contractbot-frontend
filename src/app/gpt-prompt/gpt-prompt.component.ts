@@ -7,24 +7,7 @@ import { ContractViewerComponent } from '../contract-viewer/contract-viewer.comp
   selector: 'app-gpt-prompt',
   standalone: true,
   imports: [CommonModule, ContractUploadComponent, ContractViewerComponent],
-  template: `
-    <div class="container" [class.file-uploaded]="selectedContractId !== null">
-      <div class="row">
-        <div *ngIf="selectedContractId === null">
-          <app-contract-upload 
-            (contractUploaded)="onContractUploaded($event)"
-            (contractSelected)="onContractSelected($event)">
-          </app-contract-upload>
-        </div>
-        <div *ngIf="selectedContractId !== null">
-          <app-contract-viewer 
-            [contractId]="selectedContractId"
-            (contractUpdated)="onContractUpdated($event)">
-          </app-contract-viewer>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './gpt-prompt.component.html',
   styleUrls: ['./gpt-prompt.component.css']
 })
 export class GptPromptComponent {

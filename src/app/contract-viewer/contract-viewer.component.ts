@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// const serverUrl = 'https://contractbot-api.azurewebsites.net';
-const serverUrl = 'http://localhost:5198';
+const serverUrl = 'https://contractbot-api.azurewebsites.net';
+// const serverUrl = 'http://localhost:5198';
 
 @Component({
   selector: 'app-contract-viewer',
